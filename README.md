@@ -1,0 +1,1 @@
+Repositório para o projeto do Hackathon TJCE + UFC
