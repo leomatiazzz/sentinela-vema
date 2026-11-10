@@ -42,31 +42,35 @@ def executar_clustering(n_clusters=7, random_state=42):
     X = vectorizer.fit_transform(corpus)
 
     kmeans = KMeans(n_clusters=n_clusters, random_state=random_state, n_init=10)
-    labels = kmeans.fit_predict(X)
-    df["cluster_id"] = labels
+    raw_labels = kmeans.fit_predict(X)
+
+    # Ordena os clusters por volume decrescente e renumera de 1 a N (mais intuitivo para magistrados e servidores)
+    contagem = pd.Series(raw_labels).value_counts()
+    mapa_ordenado = {orig_id: novo_id for novo_id, orig_id in enumerate(contagem.index, start=1)}
+    df["cluster_id"] = pd.Series(raw_labels).map(mapa_ordenado).values
 
     # Mapeamento e titulação inteligente dos clusters
     feature_names = np.array(vectorizer.get_feature_names_out())
     clusters_info = {}
 
-    for i in range(n_clusters):
-        subset = df[df["cluster_id"] == i]
+    for novo_id, orig_id in enumerate(contagem.index, start=1):
+        subset = df[df["cluster_id"] == novo_id]
         tam = len(subset)
         pct = (tam / len(df) * 100)
         
-        # Palavras-chave dominantes do centróide
-        top_indices = kmeans.cluster_centers_[i].argsort()[::-1][:6]
+        # Palavras-chave dominantes do centróide original correspondente
+        top_indices = kmeans.cluster_centers_[orig_id].argsort()[::-1][:6]
         top_terms = [feature_names[idx] for idx in top_indices]
         
-        # Classe e Assunto mais comuns no cluster
+        # Classe e assunto mais comuns no cluster
         top_classe = subset["classe_nome"].mode().iloc[0] if not subset.empty else "N/A"
         top_assunto = subset["assunto_principal"].mode().iloc[0] if not subset.empty else "N/A"
         
         # Título descritivo profissional para o cluster
         titulo = f"{top_classe} — {top_assunto}"
         
-        clusters_info[i] = {
-            "cluster_id": i,
+        clusters_info[novo_id] = {
+            "cluster_id": novo_id,
             "titulo": titulo,
             "tamanho": tam,
             "porcentagem": round(pct, 1),
