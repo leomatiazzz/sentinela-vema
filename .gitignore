@@ -1,0 +1,26 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Configurações e credenciais
+.env
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Dados brutos e volumosos (para não comitar no Git)
+data/raw/
+data/inspect/
+*.sqlite3
+*.db
+
+# Documentos locais e PDFs de histórico
+*.pdf
+TJCE - Conversa chatgpt.pdf
+
+
