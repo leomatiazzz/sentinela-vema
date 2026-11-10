@@ -20,11 +20,26 @@ from src.similarity import MotorSimilaridade
 from src.synthesizer import obter_casos_teste, obter_caso_por_id
 
 # -----------------------------------------------------------------------------
+# ÍCONES VETORIAIS INSTITUCIONAIS (SVG INLINE PADRONIZADO E LEVE)
+# -----------------------------------------------------------------------------
+SVG_SCALE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px;"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>'
+SVG_AWARD = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>'
+SVG_DATABASE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>'
+
+SVG_FOLDER = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#153e71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>'
+SVG_ACTIVITY = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d19730" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
+SVG_TRENDING = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>'
+SVG_NETWORK = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>'
+
+SVG_VERIFIED = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>'
+SVG_FILE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#153e71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 6px;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>'
+
+# -----------------------------------------------------------------------------
 # CONFIGURAÇÃO DA PÁGINA
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="Sentinela-VEMA | TJCE",
-    page_icon="⚖️",
+    page_icon="assets/logo.png" if os.path.exists("assets/logo.png") else None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -34,21 +49,25 @@ st.set_page_config(
 # -----------------------------------------------------------------------------
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
     /* Tipografia global */
-    html, body, [class*="css"], .stMarkdown, .stText, [data-testid="stAppViewContainer"], 
-    .stSelectbox, .stButton, [data-baseweb="tab"], p, div, span, label {
+    html, body, [data-testid="stAppViewContainer"], .stMarkdown p, .stMarkdown h1, 
+    .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6,
+    .stSelectbox, .stButton button, [data-baseweb="tab"], label {
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }
 
-    /* Preservação de ícones nativos do Streamlit */
+    /* Preservação e renderização de ícones e setas nativas do Streamlit */
     [data-testid="stIconMaterial"], 
-    .material-icons, 
-    .material-symbols-outlined, 
-    .material-symbols-rounded, 
-    .material-symbols-sharp {
-        font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', sans-serif !important;
+    span[data-testid="stIconMaterial"],
+    [data-testid*="stIcon"], 
+    [data-testid*="stExpanderToggleIcon"] span,
+    summary span:first-child,
+    summary svg {
+        font-family: 'Material Symbols Rounded' !important;
+        font-feature-settings: 'liga' !important;
+        -webkit-font-feature-settings: 'liga' !important;
     }
 
     /* Cores de fundo e estrutura */
@@ -282,7 +301,7 @@ with st.sidebar:
     if os.path.exists("assets/logo.png"):
         st.image("assets/logo.png", use_container_width=True)
     else:
-        st.markdown("### ⚖️ **TJCE**")
+        st.markdown("### **TJCE**")
 
     st.markdown("""
     <div style="text-align: center; margin-top: -6px; margin-bottom: 14px;">
@@ -292,22 +311,22 @@ with st.sidebar:
     st.divider()
 
     st.markdown("**Unidade jurisdicional:**")
-    st.markdown("🏛️ **Vara Estadual do Meio Ambiente (VEMA)**")
+    st.markdown("**Vara Estadual do Meio Ambiente (VEMA)**")
     st.caption("Comarca de Fortaleza • Cód. órgão: `93861`")
     
     st.markdown("**Fonte oficial dos dados:**")
-    st.markdown("📡 **API Pública DataJud / CNJ**")
+    st.markdown("**API Pública DataJud / CNJ**")
     st.caption("Metadados estruturados de processos e movimentações públicas do TJCE.")
 
     st.divider()
-    st.markdown("### 📌 Indicadores do acervo")
+    st.markdown("### Indicadores do acervo")
     st.metric("Processos no acervo", f"{stats_gerais['total_processos']:,}")
     st.metric("Atos processuais", f"{stats_gerais['total_movimentos']:,}")
     st.metric("Classes TPU mapeadas", stats_gerais['total_classes'])
     st.metric("Assuntos materiais TPU", stats_gerais['total_assuntos'])
 
     st.divider()
-    st.markdown("### 🏆 Projeto no hackathon")
+    st.markdown("### Projeto no hackathon")
     st.markdown("**I Hackathon TJCE + UFC 2026**")
     st.caption("Desafio 3: *Manejo do acervo processual para melhoria da análise de processos*")
     st.caption("Autor: **Léo Matias Araújo**")
@@ -315,7 +334,7 @@ with st.sidebar:
 # -----------------------------------------------------------------------------
 # CABEÇALHO HERO COM IDENTIDADE VISUAL DO TJCE
 # -----------------------------------------------------------------------------
-st.markdown("""
+st.markdown(f"""
 <div class="hero-card">
     <div style="display: flex; flex-direction: column; width: 100%;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
@@ -326,9 +345,9 @@ st.markdown("""
                 <div class="hero-title">Sentinela-VEMA</div>
             </div>
             <div class="badge-row">
-                <span class="badge badge-navy">Vara Estadual do Meio Ambiente • Cód. 93861</span>
-                <span class="badge badge-gold">I Hackathon TJCE + UFC 2026</span>
-                <span class="badge badge-green">Base DataJud • CNJ</span>
+                <span class="badge badge-navy">{SVG_SCALE}Vara Estadual do Meio Ambiente • Cód. 93861</span>
+                <span class="badge badge-gold">{SVG_AWARD}I Hackathon TJCE + UFC 2026</span>
+                <span class="badge badge-green">{SVG_DATABASE}Base DataJud • CNJ</span>
             </div>
         </div>
         <div class="hero-sub">
@@ -342,10 +361,10 @@ st.markdown("""
 # ABAS DE NAVEGAÇÃO
 # -----------------------------------------------------------------------------
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Panorama do acervo",
-    "🧩 Triagem e julgamento em bloco",
-    "🔍 Investigador de similaridade",
-    "💡 Diferenciais e arquitetura"
+    "Panorama do acervo",
+    "Triagem e julgamento em bloco",
+    "Investigador de similaridade",
+    "Diferenciais e arquitetura"
 ])
 
 # =============================================================================
@@ -361,32 +380,36 @@ with tab1:
     # Cards de Destaque com Cores Institucionais
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-card navy">
+            <div style="margin-bottom: 6px;">{SVG_FOLDER}</div>
             <div class="metric-title">Volume total</div>
             <div class="metric-value">1.030</div>
             <div class="metric-sub" style="color: #166534;">100% do acervo indexado</div>
         </div>
         """, unsafe_allow_html=True)
     with c2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-card gold">
+            <div style="margin-bottom: 6px;">{SVG_ACTIVITY}</div>
             <div class="metric-title">Média de atos/proc</div>
             <div class="metric-value">89,3</div>
             <div class="metric-sub" style="color: #64748b;">91.994 movimentações</div>
         </div>
         """, unsafe_allow_html=True)
     with c3:
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-card slate">
+            <div style="margin-bottom: 6px;">{SVG_TRENDING}</div>
             <div class="metric-title">Crescimento recente</div>
             <div class="metric-value">+164%</div>
             <div class="metric-sub" style="color: #dc2626;">Salto de 2021 para 2026</div>
         </div>
         """, unsafe_allow_html=True)
     with c4:
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-card green">
+            <div style="margin-bottom: 6px;">{SVG_NETWORK}</div>
             <div class="metric-title">Núcleos repetitivos</div>
             <div class="metric-value">7 clusters</div>
             <div class="metric-sub" style="color: #153e71;">Concentram >65% do acervo</div>
@@ -399,7 +422,7 @@ with tab1:
     col_chart1, col_chart2 = st.columns([6, 4])
 
     with col_chart1:
-        st.markdown("##### 📈 Evolução histórica de ajuizamentos (1994 a 2026)")
+        st.markdown("##### Evolução histórica de ajuizamentos (1994 a 2026)")
         df_anos = (
             df_processos["ano_ajuizamento"]
             .dropna()
@@ -436,7 +459,7 @@ with tab1:
         st.caption("Nota: observa-se aceleração de ajuizamentos a partir de 2024, atingindo 206 novos casos em 2026.")
 
     with col_chart2:
-        st.markdown("##### 🏛️ Perfil de classes judiciais")
+        st.markdown("##### Perfil de classes judiciais")
         df_classes = (
             df_processos["classe_nome"]
             .value_counts()
@@ -475,7 +498,7 @@ with tab1:
         st.plotly_chart(fig_classes, use_container_width=True)
 
     # Gráfico de Assuntos TPU
-    st.markdown("##### 🌿 Top 10 assuntos TPU de maior incidência na VEMA")
+    st.markdown("##### Top 10 assuntos TPU de maior incidência na VEMA")
     df_assuntos_top = (
         df_processos["assunto_principal"]
         .value_counts()
@@ -508,7 +531,7 @@ with tab1:
     st.plotly_chart(fig_assuntos, use_container_width=True)
 
     # Explorador Interativo de Dados
-    with st.expander("🔎 Explorar tabela completa de processos (com filtros)", expanded=False):
+    with st.expander("Explorar tabela completa de processos (com filtros)", expanded=False):
         filtro_classe = st.selectbox("Filtrar por classe:", ["Todas"] + sorted(df_processos["classe_nome"].unique().tolist()))
         df_filtrado = df_processos if filtro_classe == "Todas" else df_processos[df_processos["classe_nome"] == filtro_classe]
         
@@ -525,9 +548,9 @@ with tab1:
 # ABA 2: TRIAGEM E JULGAMENTO EM BLOCO (CLUSTERS TEMÁTICOS)
 # =============================================================================
 with tab2:
-    st.markdown("### 🧩 Triagem proativa e julgamento em bloco")
+    st.markdown("### Triagem proativa e julgamento em bloco")
     st.info(
-        "💡 **Inovação de negócio:** Diferente das ferramentas tradicionais onde o servidor precisa "
+        "**Inovação de negócio:** Diferente das ferramentas tradicionais onde o servidor precisa "
         "adivinhar o que buscar, o **Sentinela-VEMA** varre todo o acervo e agrupa automaticamente "
         "as ações que tratam da mesma matéria fática e jurídica, prontas para análise e despacho em lote."
     )
@@ -563,7 +586,7 @@ with tab2:
     # Lista de Processos do Cluster
     processos_no_cluster = df_clustered[df_clustered["cluster_id"] == cid_selecionado]
     
-    st.markdown(f"##### 📋 Processos agrupados no bloco ({len(processos_no_cluster)} registros)")
+    st.markdown(f"##### Processos agrupados no bloco ({len(processos_no_cluster)} registros)")
     st.dataframe(
         processos_no_cluster[[
             "numero_processo", "classe_nome", "assunto_principal", 
@@ -574,10 +597,10 @@ with tab2:
     )
 
     # Ação de Gabinete: Minuta em Bloco
-    st.markdown("##### ⚡ Ação produtiva de gabinete:")
+    st.markdown("##### Ação produtiva de gabinete:")
     c_btn1, c_btn2 = st.columns([4, 8])
     with c_btn1:
-        if st.button("📄 Gerar minuta de despacho padronizado em lote", type="primary", use_container_width=True):
+        if st.button("Gerar minuta de despacho padronizado em lote", type="primary", use_container_width=True):
             st.session_state["minuta_gerada"] = True
             
     if st.session_state.get("minuta_gerada", False):
@@ -610,7 +633,7 @@ with tab2:
 # ABA 3: INVESTIGADOR DE SIMILARIDADE (CASO A CASO)
 # =============================================================================
 with tab3:
-    st.markdown("### 🔍 Motor de similaridade híbrida e pesquisa inteligente")
+    st.markdown("### Motor de similaridade híbrida e pesquisa inteligente")
     st.write(
         "Consulte um processo do acervo ou insira o texto de um novo caso fático para localizar "
         "precedentes e processos análogos da VEMA com cálculo de pontuação explicável."
@@ -618,14 +641,14 @@ with tab3:
 
     modo_busca = st.radio(
         "Modo de análise:",
-        ["📌 Consultar por processo existente da VEMA", "📝 Analisar nova demanda / fatos livres (simulação realista)"],
+        ["Consultar por processo existente da VEMA", "Analisar nova demanda / fatos livres (simulação realista)"],
         horizontal=True
     )
 
     st.markdown("---")
 
     # MODO A: POR PROCESSO DO ACERVO
-    if modo_busca == "📌 Consultar por processo existente da VEMA":
+    if modo_busca == "Consultar por processo existente da VEMA":
         col_input1, col_input2 = st.columns([8, 4])
         with col_input1:
             sugestoes_cnj = [
@@ -648,17 +671,17 @@ with tab3:
             st.markdown("<br>", unsafe_allow_html=True)
             top_k_slider = st.slider("Quantidade de processos similares:", 2, 8, 4)
 
-        if st.button("🔎 Buscar processos similares", type="primary"):
+        if st.button("Buscar processos similares", type="primary"):
             alvo, similares = motor_sim.buscar_por_processo(numero_busca, top_k=top_k_slider)
 
             if not alvo:
                 st.error("Processo não localizado no banco da VEMA. Verifique a digitação.")
             else:
-                st.markdown("#### 🎯 Processo consultado (alvo da análise):")
+                st.markdown("#### Processo consultado (alvo da análise):")
                 st.markdown(f"""
                 <div class="content-card" style="border-left: 5px solid {TJCE_BLUE};">
                     <div style="font-size: 1.15rem; font-weight: 700; color: #153e71;">
-                        Processo nº {alvo['numero_processo']}
+                        {SVG_FILE}Processo nº {alvo['numero_processo']}
                     </div>
                     <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-top: 8px;">
                         <div><strong style="color: #64748b; font-size: 0.85rem;">Classe:</strong> {alvo['classe_nome']}</div>
@@ -670,7 +693,7 @@ with tab3:
                 </div>
                 """, unsafe_allow_html=True)
 
-                st.markdown(f"#### 🔗 Processos irmãos identificados ({len(similares)} encontrados):")
+                st.markdown(f"#### Processos irmãos identificados ({len(similares)} encontrados):")
 
                 if not similares:
                     st.warning("Nenhum processo atingiu o limiar de similaridade.")
@@ -682,9 +705,9 @@ with tab3:
                             <div class="content-card">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                     <div style="font-size: 1.1rem; font-weight: 700; color: #153e71;">
-                                        #{idx} Processo nº {sim['numero_processo']}
+                                        {SVG_FILE}#{idx} Processo nº {sim['numero_processo']}
                                     </div>
-                                    <span class="similarity-badge">Afinidade: {score}%</span>
+                                    <span class="similarity-badge">{SVG_VERIFIED}Afinidade: {score}%</span>
                                 </div>
                                 <div style="font-size: 0.95rem; color: #334155; margin-bottom: 6px;">
                                     <strong>Classe:</strong> {sim['classe_nome']} &nbsp;|&nbsp; 
@@ -719,7 +742,7 @@ with tab3:
 
     # MODO B: POR FATOS / CASO SINTÉTICO REALISTA
     else:
-        st.markdown("##### 🧪 Teste com cenários fáticos típicos do Ceará")
+        st.markdown("##### Teste com cenários fáticos típicos do Ceará")
         casos_teste = obter_casos_teste()
         titulos_casos = [f"{c['id']}: {c['titulo']}" for c in casos_teste]
         
@@ -741,12 +764,12 @@ with tab3:
             height=140
         )
 
-        if st.button("🔎 Buscar precedentes semelhantes na VEMA", type="primary"):
+        if st.button("Buscar precedentes semelhantes na VEMA", type="primary"):
             if not texto_input.strip():
                 st.warning("Por favor, informe um texto para consulta.")
             else:
                 resultados_texto = motor_sim.buscar_por_texto_livre(texto_input, top_k=5)
-                st.markdown(f"#### 🔗 Processos mais aderentes aos fatos ({len(resultados_texto)} encontrados):")
+                st.markdown(f"#### Processos mais aderentes aos fatos ({len(resultados_texto)} encontrados):")
                 
                 if not resultados_texto:
                     st.warning("Nenhum processo no acervo atingiu relevância suficiente com este texto.")
@@ -757,9 +780,9 @@ with tab3:
                             <div class="content-card">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="font-size: 1.05rem; font-weight: 700; color: #153e71;">
-                                        #{idx} Processo nº {res['numero_processo']}
+                                        {SVG_FILE}#{idx} Processo nº {res['numero_processo']}
                                     </div>
-                                    <span class="similarity-badge">Aderência: {res['score_similaridade']}%</span>
+                                    <span class="similarity-badge">{SVG_VERIFIED}Aderência: {res['score_similaridade']}%</span>
                                 </div>
                                 <div style="font-size: 0.95rem; color: #334155; margin-bottom: 4px;">
                                     <strong>Classe:</strong> {res['classe_nome']} &nbsp;|&nbsp; 
@@ -783,7 +806,7 @@ with tab3:
 # ABA 4: DIFERENCIAIS E ARQUITETURA
 # =============================================================================
 with tab4:
-    st.markdown("### 💡 Diferenciais estratégicos e arquitetura técnica")
+    st.markdown("### Diferenciais estratégicos e arquitetura técnica")
 
     st.markdown("#### 1. Como o Sentinela-VEMA se diferencia do 'Gestão de Acervo' do TJCE?")
     st.write(

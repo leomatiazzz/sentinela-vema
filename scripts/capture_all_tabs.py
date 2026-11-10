@@ -9,8 +9,10 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 with sync_playwright() as p:
     browser = p.chromium.launch(executable_path=CHROME_PATH, headless=True)
     page = browser.new_page(viewport={"width": 1440, "height": 950})
-    page.goto("http://localhost:8501", wait_until="networkidle")
-    time.sleep(3)
+    page.goto("http://localhost:8501")
+    # Aguarda o Streamlit renderizar as abas após o clustering inicial
+    page.wait_for_selector('[data-baseweb="tab"], [data-testid="stTab"], button[role="tab"]', timeout=30000)
+    time.sleep(2)
 
     # Encontra botões das abas
     tabs = page.query_selector_all('[data-testid="stTab"], [data-baseweb="tab"], button[role="tab"]')
