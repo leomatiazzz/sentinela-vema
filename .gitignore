@@ -18,6 +18,7 @@ data/raw/
 data/inspect/
 *.sqlite3
 *.db
+!data/processed/vema.db
 
 # Documentos locais e PDFs de histórico
 *.pdf
