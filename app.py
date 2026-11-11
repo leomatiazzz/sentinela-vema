@@ -295,6 +295,45 @@ TJCE_LIGHT_BLUE = "#2563eb"
 TJCE_SLATE = "#64748b"
 
 # -----------------------------------------------------------------------------
+# FORMATAÇÃO VISUAL DE TABELAS (CABEÇALHOS AMIGÁVEIS E ÍNDICES 1-BASED)
+# -----------------------------------------------------------------------------
+def preparar_tabela_processos_exibicao(df_subset):
+    """
+    Prepara o DataFrame de processos para exibição visual:
+    1. Preserva a ordem original dos registros sem qualquer reordenação;
+    2. Converte a numeração das linhas para contagem iniciada em 1 (índice original + 1),
+       preservando o vínculo exato com o registro do conjunto de dados completo;
+    3. Substitui os nomes técnicos das colunas por rótulos amigáveis, legíveis e acentuados.
+    """
+    colunas_ordem = [
+        "numero_processo", 
+        "classe_nome", 
+        "assunto_principal", 
+        "ano_ajuizamento", 
+        "total_movimentos", 
+        "ultimo_movimento_nome"
+    ]
+    df_exibicao = df_subset[colunas_ordem].copy()
+    # Converte contagem iniciada em zero para contagem iniciada em 1 (índice original + 1)
+    df_exibicao.index = df_exibicao.index + 1
+    
+    # Renomeia cabeçalhos para padrão amigável ao usuário final
+    df_exibicao.rename(columns={
+        "numero_processo": "Número do processo",
+        "classe_nome": "Classe",
+        "assunto_principal": "Assunto principal",
+        "ano_ajuizamento": "Ano de ajuizamento",
+        "total_movimentos": "Total de movimentos",
+        "ultimo_movimento_nome": "Último movimento"
+    }, inplace=True)
+    
+    return df_exibicao
+
+CONFIG_COLUNAS_PROCESSO = {
+    "Ano de ajuizamento": st.column_config.NumberColumn(format="%d")
+}
+
+# -----------------------------------------------------------------------------
 # BARRA LATERAL (SIDEBAR INSTITUCIONAL)
 # -----------------------------------------------------------------------------
 with st.sidebar:
@@ -536,10 +575,8 @@ with tab1:
         df_filtrado = df_processos if filtro_classe == "Todas" else df_processos[df_processos["classe_nome"] == filtro_classe]
         
         st.dataframe(
-            df_filtrado[[
-                "numero_processo", "classe_nome", "assunto_principal", 
-                "ano_ajuizamento", "total_movimentos", "ultimo_movimento_nome"
-            ]],
+            preparar_tabela_processos_exibicao(df_filtrado),
+            column_config=CONFIG_COLUNAS_PROCESSO,
             use_container_width=True,
             height=300
         )
@@ -588,10 +625,8 @@ with tab2:
     
     st.markdown(f"##### Processos agrupados no bloco ({len(processos_no_cluster)} registros)")
     st.dataframe(
-        processos_no_cluster[[
-            "numero_processo", "classe_nome", "assunto_principal", 
-            "ano_ajuizamento", "total_movimentos", "ultimo_movimento_nome"
-        ]],
+        preparar_tabela_processos_exibicao(processos_no_cluster),
+        column_config=CONFIG_COLUNAS_PROCESSO,
         use_container_width=True,
         height=260
     )
@@ -734,7 +769,18 @@ with tab3:
                                 proc_completo = buscar_processo_por_numero(sim["numero_processo"])
                                 if proc_completo and proc_completo.get("lista_movimentos"):
                                     df_m = pd.DataFrame(proc_completo["lista_movimentos"])
-                                    st.dataframe(df_m.head(10), use_container_width=True)
+                                    df_m_exibicao = df_m.head(10).copy()
+                                    df_m_exibicao.index = df_m_exibicao.index + 1
+                                    try:
+                                        df_m_exibicao["data_hora"] = pd.to_datetime(df_m_exibicao["data_hora"]).dt.strftime("%d/%m/%Y %H:%M")
+                                    except Exception:
+                                        pass
+                                    df_m_exibicao.rename(columns={
+                                        "data_hora": "Data e hora",
+                                        "codigo": "Código do ato",
+                                        "nome": "Movimentação processual"
+                                    }, inplace=True)
+                                    st.dataframe(df_m_exibicao, use_container_width=True)
                                 else:
                                     st.write("Sem movimentações detalhadas registradas.")
 
