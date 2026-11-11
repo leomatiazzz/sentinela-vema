@@ -18,6 +18,7 @@ from src.db import (
 from src.clustering import executar_clustering
 from src.similarity import MotorSimilaridade
 from src.synthesizer import obter_casos_teste, obter_caso_por_id
+from src.formatters import formatar_numero, formatar_percentual
 
 # -----------------------------------------------------------------------------
 # ÍCONES VETORIAIS INSTITUCIONAIS (SVG INLINE PADRONIZADO E LEVE)
@@ -330,7 +331,8 @@ def preparar_tabela_processos_exibicao(df_subset):
     return df_exibicao
 
 CONFIG_COLUNAS_PROCESSO = {
-    "Ano de ajuizamento": st.column_config.NumberColumn(format="%d")
+    "Ano de ajuizamento": st.column_config.NumberColumn(format="%d"),
+    "Total de movimentos": st.column_config.NumberColumn(format="%d")
 }
 
 # -----------------------------------------------------------------------------
@@ -359,10 +361,10 @@ with st.sidebar:
 
     st.divider()
     st.markdown("### Indicadores do acervo")
-    st.metric("Processos no acervo", f"{stats_gerais['total_processos']:,}")
-    st.metric("Atos processuais", f"{stats_gerais['total_movimentos']:,}")
-    st.metric("Classes TPU mapeadas", stats_gerais['total_classes'])
-    st.metric("Assuntos materiais TPU", stats_gerais['total_assuntos'])
+    st.metric("Processos no acervo", formatar_numero(stats_gerais['total_processos']))
+    st.metric("Atos processuais", formatar_numero(stats_gerais['total_movimentos']))
+    st.metric("Classes TPU mapeadas", formatar_numero(stats_gerais['total_classes']))
+    st.metric("Assuntos materiais TPU", formatar_numero(stats_gerais['total_assuntos']))
 
     st.divider()
     st.markdown("### Projeto no hackathon")
@@ -488,6 +490,7 @@ with tab1:
         fig_anos.update_layout(
             margin=dict(l=20, r=20, t=25, b=60),
             height=340,
+            separators=",.",
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
             font=dict(family="Plus Jakarta Sans", color="#334155")
@@ -522,6 +525,7 @@ with tab1:
         fig_classes.update_layout(
             margin=dict(l=10, r=10, t=10, b=60),
             height=340,
+            separators=",.",
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
             font=dict(family="Plus Jakarta Sans", color="#334155"),
@@ -557,6 +561,7 @@ with tab1:
         yaxis=dict(autorange="reversed"),
         margin=dict(l=20, r=20, t=20, b=20),
         height=330,
+        separators=",.",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Plus Jakarta Sans", color="#334155")
@@ -593,8 +598,8 @@ with tab2:
     )
 
     lista_clusters_labels = [
-        f"Cluster {cid}: {info['titulo']} ({info['tamanho']} processos - {info['porcentagem']}%)"
-        for cid, info in sorted(clusters_info.items(), key=lambda x: x[1]["tamanho"], reverse=True)
+        f"Cluster {cid}: {info['titulo']} ({formatar_numero(info['tamanho'])} processos - {formatar_percentual(info['porcentagem'])})"
+        for cid, info in sorted(clusters_info.items(), key=lambda x: x[0])
     ]
     
     escolha_cluster_label = st.selectbox("Selecione um núcleo temático para gerenciamento em bloco:", lista_clusters_labels)
@@ -610,8 +615,8 @@ with tab2:
         <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 10px;">
             <div><strong style="color: #64748b; font-size: 0.85rem;">Classe dominante</strong><br><span style="font-weight: 600;">{cluster_dados['classe_dominante']}</span></div>
             <div><strong style="color: #64748b; font-size: 0.85rem;">Assunto principal</strong><br><span style="font-weight: 600;">{cluster_dados['assunto_dominante']}</span></div>
-            <div><strong style="color: #64748b; font-size: 0.85rem;">Total no lote</strong><br><span style="font-weight: 700; color: #153e71;">{cluster_dados['tamanho']} processos</span></div>
-            <div><strong style="color: #64748b; font-size: 0.85rem;">Representatividade</strong><br><span style="font-weight: 700; color: #d19730;">{cluster_dados['porcentagem']}% do acervo</span></div>
+            <div><strong style="color: #64748b; font-size: 0.85rem;">Total no lote</strong><br><span style="font-weight: 700; color: #153e71;">{formatar_numero(cluster_dados['tamanho'])} processos</span></div>
+            <div><strong style="color: #64748b; font-size: 0.85rem;">Representatividade</strong><br><span style="font-weight: 700; color: #d19730;">{formatar_percentual(cluster_dados['porcentagem'])} do acervo</span></div>
         </div>
         <div>
             <strong style="color: #64748b; font-size: 0.85rem;">Termos-chave do bloco:</strong>
@@ -623,7 +628,7 @@ with tab2:
     # Lista de Processos do Cluster
     processos_no_cluster = df_clustered[df_clustered["cluster_id"] == cid_selecionado]
     
-    st.markdown(f"##### Processos agrupados no bloco ({len(processos_no_cluster)} registros)")
+    st.markdown(f"##### Processos agrupados no bloco ({formatar_numero(len(processos_no_cluster))} registros)")
     st.dataframe(
         preparar_tabela_processos_exibicao(processos_no_cluster),
         column_config=CONFIG_COLUNAS_PROCESSO,
@@ -639,7 +644,7 @@ with tab2:
             st.session_state["minuta_gerada"] = True
             
     if st.session_state.get("minuta_gerada", False):
-        st.success(f"Minuta padronizada gerada para os {cluster_dados['tamanho']} processos do cluster {cid_selecionado}!")
+        st.success(f"Minuta padronizada gerada para os {formatar_numero(cluster_dados['tamanho'])} processos do cluster {cid_selecionado}!")
         st.markdown(f"""
         ```text
         PODER JUDICIÁRIO DO ESTADO DO CEARÁ
@@ -722,7 +727,7 @@ with tab3:
                         <div><strong style="color: #64748b; font-size: 0.85rem;">Classe:</strong> {alvo['classe_nome']}</div>
                         <div><strong style="color: #64748b; font-size: 0.85rem;">Assunto:</strong> {alvo['assunto_principal']}</div>
                         <div><strong style="color: #64748b; font-size: 0.85rem;">Ano:</strong> {alvo['ano_ajuizamento']}</div>
-                        <div><strong style="color: #64748b; font-size: 0.85rem;">Total de atos:</strong> {alvo['total_movimentos']}</div>
+                        <div><strong style="color: #64748b; font-size: 0.85rem;">Total de atos:</strong> {formatar_numero(alvo['total_movimentos'])}</div>
                         <div><strong style="color: #64748b; font-size: 0.85rem;">Último ato:</strong> {alvo['ultimo_movimento_nome']}</div>
                     </div>
                 </div>
@@ -742,7 +747,7 @@ with tab3:
                                     <div style="font-size: 1.1rem; font-weight: 700; color: #153e71;">
                                         {SVG_FILE}#{idx} Processo nº {sim['numero_processo']}
                                     </div>
-                                    <span class="similarity-badge">{SVG_VERIFIED}Afinidade: {score}%</span>
+                                    <span class="similarity-badge">{SVG_VERIFIED}Afinidade: {formatar_percentual(score)}</span>
                                 </div>
                                 <div style="font-size: 0.95rem; color: #334155; margin-bottom: 6px;">
                                     <strong>Classe:</strong> {sim['classe_nome']} &nbsp;|&nbsp; 
@@ -763,7 +768,7 @@ with tab3:
                                 for exp in sim["explicacoes"]:
                                     st.markdown(f"✓ {exp}")
                                 st.progress(int(score))
-                                st.caption(f"Decomposição: Textual {sim['score_textual']}% | Estrutural {sim['score_estrutural']}%")
+                                st.caption(f"Decomposição: Textual {formatar_percentual(sim['score_textual'])} | Estrutural {formatar_percentual(sim['score_estrutural'])}")
 
                             with st.expander(f"Ver movimentações históricas do processo {sim['numero_processo']}"):
                                 proc_completo = buscar_processo_por_numero(sim["numero_processo"])
@@ -828,7 +833,7 @@ with tab3:
                                     <div style="font-size: 1.05rem; font-weight: 700; color: #153e71;">
                                         {SVG_FILE}#{idx} Processo nº {res['numero_processo']}
                                     </div>
-                                    <span class="similarity-badge">{SVG_VERIFIED}Aderência: {res['score_similaridade']}%</span>
+                                    <span class="similarity-badge">{SVG_VERIFIED}Aderência: {formatar_percentual(res['score_similaridade'])}</span>
                                 </div>
                                 <div style="font-size: 0.95rem; color: #334155; margin-bottom: 4px;">
                                     <strong>Classe:</strong> {res['classe_nome']} &nbsp;|&nbsp; 

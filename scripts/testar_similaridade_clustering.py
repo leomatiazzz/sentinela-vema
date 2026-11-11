@@ -14,6 +14,7 @@ from src.db import obter_estatisticas_gerais
 from src.clustering import executar_clustering
 from src.similarity import MotorSimilaridade
 from src.synthesizer import obter_casos_teste
+from src.formatters import formatar_numero, formatar_percentual
 
 def testar_tudo():
     print("=" * 70)
@@ -21,7 +22,7 @@ def testar_tudo():
     print("=" * 70)
 
     stats = obter_estatisticas_gerais()
-    print(f"\n[Base de dados] {stats['total_processos']} processos | {stats['total_movimentos']} atos | {stats['total_classes']} classes | {stats['total_assuntos']} assuntos.")
+    print(f"\n[Base de dados] {formatar_numero(stats['total_processos'])} processos | {formatar_numero(stats['total_movimentos'])} atos | {formatar_numero(stats['total_classes'])} classes | {formatar_numero(stats['total_assuntos'])} assuntos.")
 
     # 1. Teste de clustering (agrupamento proativo)
     print("\n" + "#" * 70)
@@ -30,9 +31,9 @@ def testar_tudo():
     
     df_clustered, clusters_info, vectorizer, kmeans, X = executar_clustering(n_clusters=7)
 
-    for cid, info in sorted(clusters_info.items(), key=lambda x: x[1]["tamanho"], reverse=True):
+    for cid, info in sorted(clusters_info.items(), key=lambda x: x[0]):
         print(f"\n[Cluster {cid}] {info['titulo']}")
-        print(f"  Volume: {info['tamanho']} processos ({info['porcentagem']}% do acervo)")
+        print(f"  Volume: {formatar_numero(info['tamanho'])} processos ({formatar_percentual(info['porcentagem'])} do acervo)")
         print(f"  Termos-chave: {', '.join(info['termos_chave'])}")
         print(f"  Processos de exemplo: {', '.join(info['exemplos_processos'][:2])}")
 
@@ -56,10 +57,10 @@ def testar_tudo():
     alvo, similares = motor.buscar_por_processo(num_teste, top_k=3)
     print(f"\n>> Top {len(similares)} processos mais similares no acervo:")
     for rank, sim in enumerate(similares, 1):
-        print(f"\n  #{rank} Processo: {sim['numero_processo']} | Relevância geral: {sim['score_similaridade']}%")
+        print(f"\n  #{rank} Processo: {sim['numero_processo']} | Relevância geral: {formatar_percentual(sim['score_similaridade'])}")
         print(f"     Classe: {sim['classe_nome']} | Ano: {sim['ano_ajuizamento']}")
         print(f"     Assunto: {sim['assunto_principal']}")
-        print(f"     Afinidade textual: {sim['score_textual']}% | Estrutural TPU: {sim['score_estrutural']}%")
+        print(f"     Afinidade textual: {formatar_percentual(sim['score_textual'])} | Estrutural TPU: {formatar_percentual(sim['score_estrutural'])}")
         print(f"     Por que são similares? {'; '.join(sim['explicacoes'])}")
 
     # 3. Teste de busca semântica por texto livre (fatos / petição)
@@ -68,7 +69,6 @@ def testar_tudo():
     print("#" * 70)
 
     casos = obter_casos_teste()
-    # Testaremos o caso 2: multa da SEMACE por supressão de vegetação
     caso_semace = casos[1]
     print(f"\n>> Fatos da consulta: '{caso_semace['titulo']}'")
     print(f"   Trecho fático pesquisado: {caso_semace['resumo_fatos'][:160]}...")
@@ -76,7 +76,7 @@ def testar_tudo():
     matches = motor.buscar_por_texto_livre(caso_semace["resumo_fatos"], top_k=3)
     print(f"\n>> Resultados retornados pelo motor para este caso fático:")
     for rank, m in enumerate(matches, 1):
-        print(f"\n  #{rank} Processo: {m['numero_processo']} (Aderência: {m['score_similaridade']}%)")
+        print(f"\n  #{rank} Processo: {m['numero_processo']} (Aderência: {formatar_percentual(m['score_similaridade'])})")
         print(f"     Classe: {m['classe_nome']} | Assunto: {m['assunto_principal']}")
         print(f"     Assuntos completos: {m['assuntos_completos']}")
         print(f"     Justificativa: {'; '.join(m['explicacoes'])}")
